@@ -1,4 +1,3 @@
-
 import logging
 import random
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -8,7 +7,7 @@ import os
 # Pegando o token do ambiente Railway
 TOKEN = os.getenv("BOT_TOKEN")
 
-# Mudança: Agora um dicionário para armazenar {user_id: (username, first_name)}
+# Agora usando dicionário {user_id: (username, first_name)}
 participants = {}
 
 message_id_store = {}
@@ -45,9 +44,7 @@ async def raffle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             winners_text += f"[{first_name}](tg://user?id={winner_id}), "
 
     winners_text = winners_text.rstrip(", ")  # Remove a última vírgula
-    winners_text += f"
-
-O número de participantes neste sorteio foi {len(participants)} pessoas 🌎"
+    winners_text += f"\n\nO número de participantes neste sorteio foi {len(participants)} pessoas 🌎"
 
     await update.message.reply_text(winners_text, parse_mode='Markdown')
 
