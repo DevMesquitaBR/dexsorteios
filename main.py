@@ -10,12 +10,26 @@ TOKEN = os.getenv("BOT_TOKEN")
 # Agora usando dicionário {user_id: (username, first_name)}
 participants = {}
 
-message_id_store = {}
+# Para armazenar o ID da mensagem principal e o ID do chat
+message_id_store = {"chat_id": None, "message_id": None}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("🎉 Participar", callback_data="join_raffle")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Clique no botão para participar do sorteio! 🎲", reply_markup=reply_markup)
+
+    # Envia a mensagem inicial e salva o ID dela
+    sent_message = await update.message.reply_text(
+        f"🎉 Sorteio Aberto! 🎉\n"
+        f"Já temos 0 participando!\n"
+        f"Clique no botão Participar para entrar! 🚀\n"
+        f"📎 Cadastre-se também aqui: https://bit.ly/42puLF6\n"
+        f"Boa sorte! 🍀",
+        reply_markup=reply_markup
+    )
+
+    # Salva o chat_id e o message_id para futuras edições
+    message_id_store["chat_id"] = sent_message.chat.id
+    message_id_store["message_id"] = sent_message.message_id
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -24,7 +38,25 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "join_raffle":
         user = query.from_user
         participants[user.id] = (user.username, user.first_name)
-        await query.edit_message_text(text="Você entrou no sorteio! Boa sorte! 🍀")
+
+        # Atualizar a mensagem com o novo número de participantes
+        try:
+            await context.bot.edit_message_text(
+                chat_id=message_id_store["chat_id"],
+                message_id=message_id_store["message_id"],
+                text=(
+                    f"🎉 Sorteio Aberto! 🎉\n"
+                    f"Já temos {len(participants)} participando!\n"
+                    f"Clique no botão Participar para entrar! 🚀\n"
+                    f"📎 Cadastre-se também aqui: https://bit.ly/42puLF6\n"
+                    f"Boa sorte! 🍀"
+                ),
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("🎉 Participar", callback_data="join_raffle")]]
+                )
+            )
+        except Exception as e:
+            logging.error(f"Erro ao editar a mensagem: {e}")
 
 async def raffle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not participants:
