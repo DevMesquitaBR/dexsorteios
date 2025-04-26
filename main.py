@@ -37,6 +37,7 @@ async def raffle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     winners_text = 'OS GANHADORES DAS BANCAS SÃO 🎉🔥:\n\n'
 
+
 "
     for winner_id in winners:
         username, first_name = participants[winner_id]
